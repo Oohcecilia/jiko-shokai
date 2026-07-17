@@ -42,10 +42,16 @@ function parseSkills(json: string): Skill[] {
 
 const defaultStats: Stat[] = [
   { label: "Projects Completed", value: 62 },
-  { label: "Years Experience", value: 7 },
+  { label: "Years Experience", value: getYearsExperience() },
   { label: "Happy Clients", value: 38 },
   { label: "GitHub Contributions", value: 4200, suffix: "+" },
 ];
+
+function getYearsExperience(): number {
+  const startYear = parseInt(getEnv("EXPERIENCE_START_YEAR", "2018"), 10);
+  const currentYear = new Date().getFullYear();
+  return currentYear - startYear;
+}
 
 const defaultSkills: Skill[] = [
   { name: "React / Next.js", level: 96, category: "Frontend" },

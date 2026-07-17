@@ -125,7 +125,7 @@ export function ProfileImage({
         alt={alt}
         width={320}
         height={400}
-        className={`rounded-[2rem] opacity-95 ${className}`}
+        className={`rounded-[2rem] opacity-80 ${className}`}
         priority
         {...props}
       />

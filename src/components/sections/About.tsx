@@ -64,8 +64,8 @@ export function About() {
             className="relative"
           >
             <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-br from-electric/20 via-transparent to-violet/20 blur-2xl" />
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-glass-border bg-gradient-to-br from-charcoal to-navy shadow-glass">
-              <ProfileImage src="/profile.png" alt="Profile portrait" className="absolute inset-0 object-cover" />
+            <div className="relative block aspect-square max-w-sm overflow-hidden rounded-[2rem] border border-glass-border bg-gradient-to-br from-charcoal to-navy shadow-glass" style={{ width: "calc(100% - 40px)", height: "calc(100% - 40px)", maxWidth: "calc(100% - 40px)", margin: "20px auto" }}>
+              <ProfileImage src="/profile.png" alt="Profile portrait" absolute />
               <div className="absolute inset-0 bg-grid-glow bg-[length:28px_28px] opacity-10" />
             </div>
 

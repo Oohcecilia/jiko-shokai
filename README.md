@@ -1,4 +1,4 @@
-# Jose Larry Cecilia — 3D Developer Portfolio
+# Developer Portfolio
 
 A cinematic, Awwwards-style developer portfolio built with Next.js 15, React 19, Three.js / React Three Fiber, GSAP, Framer Motion, and Lenis smooth scrolling.
 
