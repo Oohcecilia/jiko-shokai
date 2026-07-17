@@ -1,0 +1,34 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Preview artwork">
+  <defs>
+    <linearGradient id="bg-pulse-chat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050816"/>
+      <stop offset="55%" stop-color="#3B82F6" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.65"/>
+    </linearGradient>
+    <radialGradient id="blob0-pulse-chat" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blob1-pulse-chat" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blob2-pulse-chat" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur-pulse-chat" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+    <pattern id="grid-pulse-chat" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="1.2" cy="1.2" r="1.2" fill="#ffffff" opacity="0.06"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="#050816"/>
+  <rect width="800" height="500" fill="url(#bg-pulse-chat)"/>
+  <circle cx="323" cy="412" r="159" fill="url(#blob0-pulse-chat)" opacity="0.35" filter="url(#blur-pulse-chat)" />
+    <circle cx="549" cy="192" r="147" fill="url(#blob1-pulse-chat)" opacity="0.27" filter="url(#blur-pulse-chat)" />
+    <circle cx="404" cy="83" r="110" fill="url(#blob2-pulse-chat)" opacity="0.19" filter="url(#blur-pulse-chat)" />
+  <rect width="800" height="500" fill="url(#grid-pulse-chat)"/>
+  <rect width="800" height="500" fill="none" stroke="#ffffff" stroke-opacity="0.06"/>
+</svg>

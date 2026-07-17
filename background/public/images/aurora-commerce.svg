@@ -1,0 +1,34 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Preview artwork">
+  <defs>
+    <linearGradient id="bg-aurora-commerce" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050816"/>
+      <stop offset="55%" stop-color="#C026D3" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0.65"/>
+    </linearGradient>
+    <radialGradient id="blob0-aurora-commerce" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blob1-aurora-commerce" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C026D3" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#C026D3" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blob2-aurora-commerce" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur-aurora-commerce" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+    <pattern id="grid-aurora-commerce" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="1.2" cy="1.2" r="1.2" fill="#ffffff" opacity="0.06"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="#050816"/>
+  <rect width="800" height="500" fill="url(#bg-aurora-commerce)"/>
+  <circle cx="552" cy="96" r="93" fill="url(#blob0-aurora-commerce)" opacity="0.35" filter="url(#blur-aurora-commerce)" />
+    <circle cx="215" cy="191" r="119" fill="url(#blob1-aurora-commerce)" opacity="0.27" filter="url(#blur-aurora-commerce)" />
+    <circle cx="637" cy="388" r="93" fill="url(#blob2-aurora-commerce)" opacity="0.19" filter="url(#blur-aurora-commerce)" />
+  <rect width="800" height="500" fill="url(#grid-aurora-commerce)"/>
+  <rect width="800" height="500" fill="none" stroke="#ffffff" stroke-opacity="0.06"/>
+</svg>
