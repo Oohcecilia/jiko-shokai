@@ -69,16 +69,18 @@ export function About() {
               <div className="absolute inset-0 bg-grid-glow bg-[length:28px_28px] opacity-10" />
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="absolute -right-6 -top-6 rounded-2xl border border-glass-border bg-charcoal/80 px-4 py-3 shadow-glass backdrop-blur-xl"
-            >
-              <p className="font-display text-2xl font-semibold text-white">7+</p>
-              <p className="font-body text-[11px] text-white/50">Years crafting products</p>
-            </motion.div>
+<motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="absolute -right-6 -top-6 rounded-2xl border border-glass-border bg-charcoal/80 px-4 py-3 shadow-glass backdrop-blur-xl"
+              >
+                <p className="font-display text-2xl font-semibold text-white">
+                  {STATS.find(s => s.label === "Years Experience")?.value ?? 0}+
+                </p>
+                <p className="font-body text-[11px] text-white/50">Years crafting products</p>
+              </motion.div>
 
             {/* Hand-drawn signature that draws itself into view */}
             <svg viewBox="0 0 220 60" className="mt-6 h-14 w-48 mx-auto lg:mx-0" aria-hidden>
@@ -114,7 +116,7 @@ export function About() {
           <p className="font-body text-base leading-relaxed text-white/60 sm:text-lg">
             I&apos;m a full stack developer who treats interfaces like instruments —
             every transition, every hover, every millisecond of latency is tuned on
-            purpose. Over the last seven years I&apos;ve shipped products across
+            purpose. Over the last {STATS.find(s => s.label === "Years Experience")?.value ?? 0} years I&apos;ve shipped products across
             fintech, health, and AI, always starting from the same question:
             what should this feel like to use?
           </p>
@@ -124,11 +126,11 @@ export function About() {
             different ways to see which one actually feels faster.
           </p>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {/* <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {STATS.map((stat) => (
               <StatCounter key={stat.label} {...stat} />
             ))}
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-6 overflow-x-auto py-2 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex shrink-0 animate-marquee items-center gap-6">

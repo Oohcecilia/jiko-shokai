@@ -49,8 +49,12 @@ const defaultStats: Stat[] = [
 
 function getYearsExperience(): number {
   const startYear = parseInt(getEnv("EXPERIENCE_START_YEAR", "2018"), 10);
-  const currentYear = new Date().getFullYear();
-  return currentYear - startYear;
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth(); // 0-indexed, May = 4
+  let years = currentYear - startYear;
+  if (currentMonth < 4) years -= 1;
+  return Math.max(0, years);
 }
 
 const defaultSkills: Skill[] = [
@@ -245,6 +249,7 @@ export const siteConfig = {
   twitter: getEnv("SITE_TWITTER_URL", "https://twitter.com"),
   facebook: getEnv("SITE_FACEBOOK_URL", "https://facebook.com"),
   instagram: getEnv("SITE_INSTAGRAM_URL", "https://instagram.com"),
+  experience: getEnv("SITE_EXPERIENCE", "5")
 };
 
 export function getStats(): Stat[] {
