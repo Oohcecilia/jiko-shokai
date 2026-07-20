@@ -2,12 +2,20 @@
 
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ExternalLink, Github } from "lucide-react";
-import { type MouseEvent, useRef } from "react";
+import { type MouseEvent, useRef, useState } from "react";
 import { SectionHeading } from "@/components/motion/SectionHeading";
 import { Badge } from "@/components/ui/badge";
+import { ProjectImage } from "@/components/ui/Image";
 import { useParallax } from "@/hooks/useScrollFx";
 import { PROJECTS } from "@/lib/data";
+import { blurData } from "@/lib/blur-data";
 import type { Project } from "@/types";
+
+/** Extract filename (e.g. "synchaura.png") from a full path like "/projects/synchaura.png" */
+function getBlurForPath(imagePath: string): string | undefined {
+  const filename = imagePath.split("/").pop();
+  return filename ? blurData[filename] : undefined;
+}
 
 const GRADIENTS = [
   "from-electric/30 via-navy to-charcoal",
@@ -17,6 +25,7 @@ const GRADIENTS = [
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 });
@@ -59,12 +68,23 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           <div
             className={`relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br ${GRADIENTS[index % GRADIENTS.length]}`}
           >
-            <motion.span
+            <ProjectImage
+              src={project.image}
+              alt={project.title}
+              className={`object-cover transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              blurDataURL={getBlurForPath(project.image)}
+              onImageLoad={() => setImageLoaded(true)}
+              onImageError={() => setImageLoaded(false)}
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/20 to-navy/5" />
+
+            <span
               style={{ transformStyle: "preserve-3d" }}
-              className="absolute inset-0 flex items-center justify-center font-display text-5xl sm:text-6xl font-bold text-white/10 transition-transform duration-700 ease-premium group-hover:scale-110"
+              className={`absolute inset-0 flex items-center justify-center font-display text-5xl sm:text-6xl font-bold text-white/10 transition-all duration-500 ease-premium group-hover:scale-110 ${imageLoaded ? 'opacity-0 scale-105' : 'opacity-100 scale-100'}`}
             >
               {project.title.split(" ")[0]}
-            </motion.span>
+            </span>
             <div className="absolute inset-0 bg-grid-glow bg-[length:32px_32px] opacity-10" />
 
             <div className="absolute inset-0 flex items-center justify-center gap-3 bg-navy/70 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">

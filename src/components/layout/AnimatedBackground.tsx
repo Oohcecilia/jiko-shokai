@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePerformanceTier, usePrefersReducedMotion } from "@/hooks/usePerf";
+import { usePrefersReducedMotion, useIsMobilePhone } from "@/hooks/usePerf";
 import { useAppStore } from "@/store/useAppStore";
 
 interface Particle {
@@ -20,89 +20,97 @@ export function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const gridRef = useRef<HTMLDivElement>(null);
-  const tier = usePerformanceTier();
   const reducedMotion = usePrefersReducedMotion();
-  const [particles, setParticles] = useState<Particle[]>([]);
+  const isMobile = useIsMobilePhone();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+
+    // ── Scrolling parallax (moved to scroll listener, no RAF needed) ──
+    const updateParallax = () => {
+      const progress = useAppStore.getState().scrollProgress;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrolledPx = progress * docHeight;
+      layerRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const depth = DEPTH[i] ?? 0.08;
+        el.style.transform = `translate3d(0, ${-(scrolledPx * depth)}px, 0)`;
+      });
+      if (gridRef.current) {
+        gridRef.current.style.transform = `translate3d(0, ${-(scrolledPx * GRID_DEPTH)}px, 0)`;
+      }
+    };
+
+    // ── Scrolling parallax via passive scroll listener ──
+    // Fires on native scroll — far more efficient than a RAF loop
+    window.addEventListener("scroll", updateParallax, { passive: true });
+
+    // ── Canvas particles (skipped on mobile phones + reduced motion) ──
+    // Tablets and desktops still get the full particle experience.
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const ctx = canvas?.getContext("2d");
 
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
+    const skipParticles = isMobile || reducedMotion;
+    let frame: number | null = null;
 
-    resizeCanvas();
-
-    const count = tier === "low" ? 40 : 110;
-    const newParticles: Particle[] = Array.from({ length: count }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.4 + 0.3,
-      vx: (Math.random() - 0.5) * 0.08,
-      vy: (Math.random() - 0.5) * 0.08,
-      o: Math.random() * 0.6 + 0.2,
-    }));
-    setParticles(newParticles);
-
-    let frame: number;
-    const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(180, 200, 255, ${p.o})`;
-        ctx.fill();
-      }
-
-      if (!reducedMotion) {
-        const progress = useAppStore.getState().scrollProgress;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const scrolledPx = progress * docHeight;
-
-        layerRefs.current.forEach((el, i) => {
-          if (!el) return;
-          const depth = DEPTH[i] ?? 0.08;
-          el.style.transform = `translate3d(0, ${-(scrolledPx * depth)}px, 0)`;
-        });
-        if (gridRef.current) {
-          gridRef.current.style.transform = `translate3d(0, ${-(scrolledPx * GRID_DEPTH)}px, 0)`;
-        }
-      }
-
-      frame = requestAnimationFrame(render);
-    };
-    render();
-
-    const onResize = () => {
+    if (canvas && ctx && !skipParticles) {
+      const resizeCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      };
       resizeCanvas();
-      setParticles((prev) =>
-        prev.map((p) => ({
-          ...p,
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-        }))
-      );
-    };
-    window.addEventListener("resize", onResize);
 
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [tier, reducedMotion, particles]);
+      const count = 110;
+      const particleList: Particle[] = Array.from({ length: count }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.3,
+        vx: (Math.random() - 0.5) * 0.08,
+        vy: (Math.random() - 0.5) * 0.08,
+        o: Math.random() * 0.6 + 0.2,
+      }));
+
+      const render = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const p of particleList) {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = canvas.width;
+          if (p.x > canvas.width) p.x = 0;
+          if (p.y < 0) p.y = canvas.height;
+          if (p.y > canvas.height) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180, 200, 255, ${p.o})`;
+          ctx.fill();
+        }
+        frame = requestAnimationFrame(render);
+      };
+      render();
+
+      const onResize = () => {
+        resizeCanvas();
+        // Re-randomize particle positions on resize so distribution stays even
+        particleList.forEach((p) => {
+          p.x = Math.random() * canvas.width;
+          p.y = Math.random() * canvas.height;
+        });
+      };
+      window.addEventListener("resize", onResize);
+
+      return () => {
+        if (frame !== null) cancelAnimationFrame(frame);
+        window.removeEventListener("resize", onResize);
+        window.removeEventListener("scroll", updateParallax);
+      };
+    }
+
+    // No particles — still need to render initial parallax positions
+    updateParallax();
+    return () => window.removeEventListener("scroll", updateParallax);
+  }, [reducedMotion, isMobile]);
 
   if (!mounted) {
     return (

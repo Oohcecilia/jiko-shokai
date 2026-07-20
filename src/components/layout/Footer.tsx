@@ -40,7 +40,7 @@ export function Footer() {
           transition={{ duration: 0.6 }}
           className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-white"
         >
-          {SITE.name.split(" ")[0]}
+          {SITE.name.replace(/\s/g, "")}
           <span className="text-electric">.</span>
         </motion.span>
 

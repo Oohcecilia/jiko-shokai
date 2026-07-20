@@ -12,6 +12,9 @@ interface ThemedImageProps {
   priority?: boolean;
   fill?: boolean;
   sizes?: string;
+  blurDataURL?: string;
+  onImageLoad?: () => void;
+  onImageError?: () => void;
 }
 
 const FALLBACK_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%230a0a0a' width='400' height='300'/%3E%3Crect x='100' y='100' width='200' height='100' rx='8' fill='%231a1a2e' stroke='%2300d4ff' stroke-width='2' stroke-dasharray='8,4'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-family='system-ui,sans-serif' font-size='14' fill='%2300d4ff' font-weight='600'%3EIMAGE%3C/text%3E%3Ctext x='200' y='180' text-anchor='middle' font-family='system-ui,sans-serif' font-size='10' fill='%236b7280'%3ENOT FOUND%3C/text%3E%3C/svg%3E`;
@@ -27,6 +30,9 @@ export function ThemedImage({
   priority = false,
   fill = false,
   sizes = "100vw",
+  blurDataURL = LOADING_SVG,
+  onImageLoad,
+  onImageError,
 }: ThemedImageProps) {
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,9 +72,15 @@ export function ThemedImage({
         sizes={sizes}
         priority={priority}
         placeholder="blur"
-        blurDataURL={LOADING_SVG}
-        onLoad={() => setIsLoading(false)}
-        onError={() => setHasError(true)}
+        blurDataURL={blurDataURL}
+        onLoad={() => {
+          setIsLoading(false);
+          onImageLoad?.();
+        }}
+        onError={() => {
+          setHasError(true);
+          onImageError?.();
+        }}
         className={`transition-opacity duration-500 ${isLoading ? "opacity-0" : "opacity-100"}`}
       />
       {isLoading && (
@@ -135,7 +147,14 @@ export function ProfileImage({
   );
 }
 
-export function ProjectImage({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
+export function ProjectImage({ src, alt, className = "", blurDataURL, onImageLoad, onImageError }: {
+  src: string;
+  alt: string;
+  className?: string;
+  blurDataURL?: string;
+  onImageLoad?: () => void;
+  onImageError?: () => void;
+}) {
   return (
     <ThemedImage
       src={src}
@@ -143,6 +162,9 @@ export function ProjectImage({ src, alt, className = "" }: { src: string; alt: s
       fill
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       className={`rounded-xl ${className}`}
+      blurDataURL={blurDataURL}
+      onImageLoad={onImageLoad}
+      onImageError={onImageError}
     />
   );
 }

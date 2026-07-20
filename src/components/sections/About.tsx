@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import dynamic from "next/dynamic";
 import {
   Atom,
@@ -44,7 +44,13 @@ function StatCounter({ value, label, suffix }: { value: number; label: string; s
 export function About() {
   const portraitParallax = useParallax<HTMLDivElement>({ distance: 34, scrub: 0.8 });
   const [cubeContainerRef, cubeProgressRef] = useSectionProgress<HTMLDivElement>();
-
+  // Track whether the cube container is in the viewport so SkillCube
+  // can pause its R3F render loop when offscreen (saves GPU).
+  // Use a generous margin to keep the loop running a bit before/after
+  // entering view, preventing flicker during fast scrolling.
+  const cubeInView = useInView(cubeContainerRef, {
+    margin: "200px 0px 200px 0px",
+  });
 
   return (
     <section id="about" className="relative mx-auto max-w-6xl px-6 py-28 sm:py-36">
@@ -156,7 +162,7 @@ export function About() {
         className="relative mx-auto mt-24 h-[340px] max-w-2xl sm:h-[420px]"
       >
         <div className="absolute inset-0 rounded-[2rem] border border-glass-border bg-white/[0.015] backdrop-blur-md" />
-        <SkillCube progressRef={cubeProgressRef} />
+        <SkillCube progressRef={cubeProgressRef} inView={cubeInView} />
         <p className="absolute bottom-4 left-1/2 -translate-x-1/2 font-body text-xs text-white/35">
           Drag your cursor to tilt
         </p>

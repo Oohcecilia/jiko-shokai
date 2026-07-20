@@ -1,13 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useReducedMotion,
-} from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ChevronDown, Sparkles } from "lucide-react";
 import { site } from "@/config/site";
 import { MagneticButton } from "@/components/ui/MagneticButton";
@@ -15,7 +10,7 @@ import { GradientText } from "@/components/ui/GradientText";
 import { useLenis } from "@/components/providers/SmoothScrollProvider";
 
 const Scene = dynamic(
-  () => import("@/components/three/Scene").then((m) => m.Scene),
+  () => import("@/components/three/LazyScene").then((m) => m.LazyScene),
   { ssr: false }
 );
 
@@ -40,23 +35,76 @@ export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const lenis = useLenis();
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion || !sectionRef.current) return;
+
+    let rafId: number;
+    const section = sectionRef.current;
+
+    function updateScroll() {
+      const rect = section.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const progress = Math.max(0, Math.min(1, -rect.top / (rect.height - viewportHeight)));
+      setScrollProgress(progress);
+      rafId = requestAnimationFrame(updateScroll);
+    }
+
+    rafId = requestAnimationFrame(updateScroll);
+    return () => cancelAnimationFrame(rafId);
+  }, [prefersReducedMotion]);
+
+  const y = scrollProgress * 120;
+  const opacity = Math.max(0, 1 - scrollProgress / 0.8);
 
   function scrollToSection(id: string) {
     const target = document.querySelector(id);
     if (!target) return;
-    if (lenis) {
+    if (lenis && !isMobile) {
       lenis.scrollTo(target as HTMLElement, { offset: -24 });
     } else {
       target.scrollIntoView({ behavior: "smooth" });
     }
   }
+
+  // Scroll indicator - plain button on mobile to avoid touch interception
+  const ScrollIndicator = isMobile ? (
+    <button
+      type="button"
+      onClick={() => scrollToSection("#projects")}
+      aria-label="Scroll to projects"
+      className="absolute bottom-8 z-10 flex flex-col items-center gap-2 text-muted transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+    >
+      <span className="text-xs uppercase tracking-[0.2em]">Scroll</span>
+      <span className="animate-bounce" style={{ animationDuration: "1.6s" }}>
+        <ChevronDown size={18} />
+      </span>
+    </button>
+  ) : (
+    <motion.button
+      type="button"
+      onClick={() => scrollToSection("#projects")}
+      aria-label="Scroll to projects"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 1.2, duration: 0.8 }}
+      className="absolute bottom-8 z-10 flex flex-col items-center gap-2 text-muted transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+    >
+      <span className="text-xs uppercase tracking-[0.2em]">Scroll</span>
+      <span className="animate-bounce" style={{ animationDuration: "1.6s" }}>
+        <ChevronDown size={18} />
+      </span>
+    </motion.button>
+  );
 
   return (
     <section
@@ -83,15 +131,14 @@ export function Hero() {
         />
       </div>
 
-      <motion.div
-        style={{ y, opacity }}
-        variants={container}
-        initial="hidden"
-        animate="show"
+      <div
+        style={{ transform: `translateY(${y}px)`, opacity }}
         className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center"
       >
         <motion.span
           variants={item}
+          initial="hidden"
+          animate="show"
           className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-muted backdrop-blur-sm"
         >
           <span className="relative flex h-2 w-2">
@@ -103,6 +150,8 @@ export function Hero() {
 
         <motion.p
           variants={item}
+          initial="hidden"
+          animate="show"
           className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-muted"
         >
           {site.name} · {site.role}
@@ -110,6 +159,8 @@ export function Hero() {
 
         <motion.h1
           variants={item}
+          initial="hidden"
+          animate="show"
           className="text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl"
         >
           Building Beautiful
@@ -119,6 +170,8 @@ export function Hero() {
 
         <motion.p
           variants={item}
+          initial="hidden"
+          animate="show"
           className="mx-auto mt-6 max-w-xl text-balance text-lg leading-relaxed text-muted"
         >
           {site.bio}
@@ -126,6 +179,8 @@ export function Hero() {
 
         <motion.div
           variants={item}
+          initial="hidden"
+          animate="show"
           className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
         >
           <MagneticButton
@@ -143,25 +198,9 @@ export function Hero() {
             Contact
           </MagneticButton>
         </motion.div>
-      </motion.div>
+      </div>
 
-      <motion.button
-        type="button"
-        onClick={() => scrollToSection("#projects")}
-        aria-label="Scroll to projects"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.8 }}
-        className="absolute bottom-8 z-10 flex flex-col items-center gap-2 text-muted transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-      >
-        <span className="text-xs uppercase tracking-[0.2em]">Scroll</span>
-        <motion.span
-          animate={prefersReducedMotion ? undefined : { y: [0, 6, 0] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ChevronDown size={18} />
-        </motion.span>
-      </motion.button>
+      {ScrollIndicator}
     </section>
   );
 }

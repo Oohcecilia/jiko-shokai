@@ -97,12 +97,17 @@ function Rotator({ children, progressRef }: { children: ReactNode; progressRef?:
   return <group ref={ref}>{children}</group>;
 }
 
-export function TechSphere({ progressRef }: { progressRef?: MutableRefObject<number> }) {
+export function TechSphere({ progressRef, inView = true }: { progressRef?: MutableRefObject<number>; inView?: boolean }) {
   const tier = usePerformanceTier();
   const points = useFibonacciSphere(TECHS.length, 2.6);
 
+  // Pause the R3F render loop when the Skills section is scrolled
+  // out of view — saves GPU without affecting the visual experience.
+  const frameloop = inView ? "always" : "never";
+
   return (
     <Canvas
+      frameloop={frameloop}
       camera={{ position: [0, 0, 6.5], fov: 42 }}
       dpr={[1, tier === "low" ? 1.2 : 1.8]}
       style={{ width: "100%", height: "100%" }}

@@ -1,38 +1,23 @@
-import emailjs from "@emailjs/browser";
 import type { ContactFormValues } from "@/types";
 
-const SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ?? "";
-const TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID ?? "";
-const PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY ?? "";
-
 /**
- * Sends the contact form through EmailJS.
- *
- * To wire this up for real:
- * 1. Create a (free) account at https://www.emailjs.com
- * 2. Add an email service + template, matching {{name}}, {{email}},
- *    {{subject}} and {{message}} variables in the template body.
- * 3. Copy the three IDs into .env.local (see .env.example).
- *
- * Until those env vars are set, this throws a clear error instead of
- * silently failing, so the form's error state can surface it.
+ * Sends the contact form via the server-side API route.
+ * 
+ * This uses a server-side API which sends emails via EmailJS,
+ * keeping credentials secure on the server.
  */
-export async function sendContactEmail(values: ContactFormValues) {
-  if (!SERVICE_ID || !TEMPLATE_ID || !PUBLIC_KEY) {
-    throw new Error(
-      "EmailJS is not configured yet. Add your service/template/public keys to .env.local."
-    );
+export async function sendContactEmail(values: ContactFormValues & { recaptchaToken?: string }) {
+  const response = await fetch("/api/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(values),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to send message. Please try again.");
   }
 
-  return emailjs.send(
-    SERVICE_ID,
-    TEMPLATE_ID,
-    {
-      from_name: values.name,
-      reply_to: values.email,
-      subject: values.subject,
-      message: values.message,
-    },
-    { publicKey: PUBLIC_KEY }
-  );
+  return data;
 }

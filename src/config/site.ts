@@ -48,7 +48,7 @@ const defaultStats: Stat[] = [
 ];
 
 function getYearsExperience(): number {
-  const startYear = parseInt(getEnv("EXPERIENCE_START_YEAR", "2018"), 10);
+  const startYear = parseInt(getEnv("EXPERIENCE_START_YEAR", "2022"), 10);
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth(); // 0-indexed, May = 4
@@ -66,7 +66,7 @@ const defaultSkills: Skill[] = [
   { name: "GraphQL", level: 78, category: "Backend" },
   { name: "PostgreSQL", level: 85, category: "Databases" },
   { name: "Redis", level: 74, category: "Databases" },
-  { name: "React Native", level: 80, category: "Mobile" },
+  { name: "React Native", level: 60, category: "Mobile" },
   { name: "Swift (iOS)", level: 58, category: "Mobile" },
   { name: "Figma", level: 88, category: "UI/UX" },
   { name: "Design Systems", level: 84, category: "UI/UX" },
@@ -80,25 +80,25 @@ const defaultSkills: Skill[] = [
 
 const defaultProjects: Project[] = [
   {
-    id: "orbital",
-    title: "Orbital — Realtime Ops Dashboard",
+    id: "synchaura",
+    title: "Synchaura — Built for collaboration",
     description:
-      "A mission-control style dashboard for infrastructure teams, streaming millions of events a day through a WebSocket pipeline into a 60fps canvas renderer.",
-    image: "/projects/orbital.jpg",
-    tags: ["Next.js", "WebSockets", "D3.js", "PostgreSQL"],
-    liveUrl: "#",
-    githubUrl: "#",
+      "Collaborative task management for high-performing teams, keeping your organization aligned and projects on schedule.",
+    image: "/projects/synchaura.png",
+    tags: ["React.js", "WebSockets", "D3.js", "Couchdb"],
+    liveUrl: "https://synchaura.dpdns.org",
+    githubUrl: "https://github.com/Oohcecilia/synchaura",
     featured: true,
   },
   {
-    id: "lumen",
-    title: "Lumen — AI Writing Studio",
+    id: "vibeoke",
+    title: "Vibeoke - Karaoke System",
     description:
-      "An LLM-powered writing environment with streaming completions, version history, and a real-time collaborative canvas built on CRDTs.",
-    image: "/projects/lumen.jpg",
-    tags: ["React", "OpenAI", "Yjs", "Node.js"],
-    liveUrl: "#",
-    githubUrl: "#",
+      "The ultimate real-time karaoke party experience for homes and social events, featuring a synchronized player and mobile-remote controller.",
+    image: "/projects/vibeoke.png",
+    tags: ["React", "Websocket", "Yjs", "Node.js"],
+    liveUrl: "https://vibeoke.dpdns.org",
+    githubUrl: "https://github.com/Oohcecilia/vibeoke",
     featured: true,
   },
   {
@@ -106,41 +106,41 @@ const defaultProjects: Project[] = [
     title: "Vaultline — Fintech Onboarding",
     description:
       "A compliance-heavy KYC onboarding flow re-imagined as a guided, animated experience — cut drop-off by 34% in the first quarter.",
-    image: "/projects/vaultline.jpg",
+    image: "",
     tags: ["TypeScript", "Framer Motion", "Node.js", "AWS"],
     liveUrl: "#",
     githubUrl: "#",
     featured: true,
   },
   {
-    id: "atlasfit",
-    title: "AtlasFit — Cross-Platform Training App",
+    id: "philman",
+    title: "PhilManPower Digital Bridge",
     description:
-      "A React Native training companion with offline-first sync, wearable integration, and a native-feeling animation layer.",
-    image: "/projects/atlasfit.jpg",
-    tags: ["React Native", "GraphQL", "SQLite"],
-    liveUrl: "#",
-    githubUrl: "#",
+      "A premium B2B recruitment gateway connecting qualified Filipino professionals with European employers through a seamless, compliant, and transparent digital process.",
+    image: "/projects/philman.png",
+    tags: ["Next.js", "Node.js"],
+    liveUrl: "https://oohcecilia.github.io/philmanpower/",
+    githubUrl: "https://github.com/Oohcecilia/philmanpower",
   },
   {
-    id: "northwind",
-    title: "Northwind Commerce Platform",
+    id: "Stadium",
+    title: "Stadium Sanctum",
     description:
-      "A headless commerce storefront serving 8 regional brands from one Next.js codebase, with edge-rendered personalization.",
-    image: "/projects/northwind.jpg",
-    tags: ["Next.js", "Shopify", "Vercel Edge"],
-    liveUrl: "#",
-    githubUrl: "#",
+      "A high-end, immersive sports bar experience, premium table reservations, and an electric atmosphere designed for the modern sports enthusiast.",
+    image: "/projects/stadium.png",
+    tags: ["React.js", "Vercel Edge"],
+    liveUrl: "https://oohcecilia.github.io/mb_lp/",
+    githubUrl: "https://github.com/Oohcecilia/mb_lp",
   },
   {
-    id: "signalboard",
-    title: "Signalboard — Analytics SDK",
+    id: "serenite",
+    title: "Serenité Café & Restaurant",
     description:
-      "A lightweight, privacy-first analytics SDK with a Rust ingestion service and a dashboard for funnels, retention and replay.",
-    image: "/projects/signalboard.jpg",
-    tags: ["Rust", "Next.js", "ClickHouse"],
-    liveUrl: "#",
-    githubUrl: "#",
+      "An elegant digital home for an upscale café and restaurant, featuring seasonal menus, reservation management, and our brand story.",
+    image: "/projects/verdant.png",
+    tags: ["React.js", "ClickHouse"],
+    liveUrl: "https://oohcecilia.github.io/verdant-distro/",
+    githubUrl: "https://github.com/Oohcecilia/verdant-distro",
   },
 ];
 
@@ -202,13 +202,6 @@ const defaultServices: Service[] = [
     icon: "Globe",
   },
   {
-    id: "mobile",
-    title: "Mobile Development",
-    description:
-      "Cross-platform apps with React Native that feel native, ship faster, and share a codebase with the web.",
-    icon: "Smartphone",
-  },
-  {
     id: "design",
     title: "UI/UX Design",
     description:
@@ -239,16 +232,16 @@ const defaultServices: Service[] = [
 ];
 
 export const siteConfig = {
-  name: getEnv("SITE_NAME", "Jose Larry Cecilia"),
+  name: getEnv("SITE_NAME", "Ooh Cecilia"),
   role: getEnv("SITE_ROLE", "Full Stack Developer"),
   location: getEnv("SITE_LOCATION", "Remote · GMT+8"),
-  email: getEnv("SITE_EMAIL", "hello@world.dev"),
+  email: getEnv("SITE_EMAIL", "oohcecilia@proton.me"),
   resumeUrl: getEnv("SITE_RESUME_URL", "/resume.pdf"),
-  github: getEnv("SITE_GITHUB_URL", "https://github.com"),
-  linkedin: getEnv("SITE_LINKEDIN_URL", "https://linkedin.com"),
+  github: getEnv("SITE_GITHUB_URL", "https://github.com/Oohcecilia"),
+  linkedin: getEnv("SITE_LINKEDIN_URL", "https://www.linkedin.com/in/jose-larry-jr-cecilia-277b54422/"),
   twitter: getEnv("SITE_TWITTER_URL", "https://twitter.com"),
-  facebook: getEnv("SITE_FACEBOOK_URL", "https://facebook.com"),
-  instagram: getEnv("SITE_INSTAGRAM_URL", "https://instagram.com"),
+  facebook: getEnv("SITE_FACEBOOK_URL", "https://www.facebook.com/profile.php?id=61591193207614"),
+  instagram: getEnv("SITE_INSTAGRAM_URL", "https://www.instagram.com/ooh_cecilia24/"),
   experience: getEnv("SITE_EXPERIENCE", "5")
 };
 

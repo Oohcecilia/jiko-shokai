@@ -2,8 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, Github, Linkedin, Loader2, Send, Twitter, CheckCircle2, XCircle, Facebook, Instagram } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Download, Github, Linkedin, Loader2, Send, CheckCircle2, XCircle, Facebook, Instagram } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useMemo, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { FloatingOrbs } from "@/components/motion/FloatingOrbs";
 import { SectionHeading } from "@/components/motion/SectionHeading";
@@ -13,6 +14,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { sendContactEmail } from "@/lib/email";
 import { SITE } from "@/lib/data";
 import { contactSchema, type ContactSchema } from "@/lib/validations";
+
+function RecaptchaSkeleton() {
+  return (
+    <div className="flex w-[156px] items-center gap-2 py-1">
+      <div className="h-6 w-6 animate-pulse rounded-sm bg-white/10" />
+      <div className="flex flex-col gap-1">
+        <div className="h-2 w-16 animate-pulse rounded-full bg-white/8" />
+        <div className="h-2 w-10 animate-pulse rounded-full bg-white/6" />
+      </div>
+    </div>
+  );
+}
+
+const ReCAPTCHADynamic = dynamic(
+  () => import("react-google-recaptcha"),
+  {
+    ssr: false,
+    loading: () => <RecaptchaSkeleton />,
+  },
+);
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -87,6 +108,10 @@ function DotWorldMap() {
 export function Contact() {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [recaptchaKey, setRecaptchaKey] = useState(0);
+
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
   const {
     register,
@@ -95,12 +120,24 @@ export function Contact() {
     formState: { errors },
   } = useForm<ContactSchema>({ resolver: zodResolver(contactSchema) });
 
+  const onRecaptchaChange = useCallback((token: string | null) => {
+    setRecaptchaToken(token);
+  }, []);
+
   const onSubmit = async (values: ContactSchema) => {
+    if (!recaptchaToken && recaptchaSiteKey) {
+      setErrorMessage("Please complete the reCAPTCHA verification.");
+      setStatus("error");
+      return;
+    }
+
     setStatus("loading");
     try {
-      await sendContactEmail(values);
+      await sendContactEmail({ ...values, recaptchaToken: recaptchaToken ?? undefined });
       setStatus("success");
       reset();
+      setRecaptchaKey((prev) => prev + 1);
+      setRecaptchaToken(null);
       setTimeout(() => setStatus("idle"), 4000);
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Something went wrong.");
@@ -173,6 +210,7 @@ export function Contact() {
             <Textarea label="Message" {...register("message")} error={errors.message?.message} />
           </div>
 
+
           <Button type="submit" className="mt-6 w-full" disabled={status === "loading"}>
             <AnimatePresence mode="wait" initial={false}>
               {status === "loading" ? (
@@ -190,6 +228,19 @@ export function Contact() {
               )}
             </AnimatePresence>
           </Button>
+
+
+            {recaptchaSiteKey && (
+            <div className="mt-2 w-full flex justify-center overflow-hidden">
+              <ReCAPTCHADynamic
+                key={recaptchaKey}
+                sitekey={recaptchaSiteKey}
+                onChange={onRecaptchaChange}
+                theme="dark"
+                size="normal"
+              />
+            </div>
+          )}
 
           <AnimatePresence>
             {status === "error" && (

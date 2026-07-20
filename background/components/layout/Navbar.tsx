@@ -16,8 +16,16 @@ const LINKS = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const lenis = useLenis();
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     function handleScroll() {
@@ -43,12 +51,19 @@ export function Navbar() {
     setMenuOpen(false);
     const target = document.querySelector(id);
     if (!target) return;
-    if (lenis) {
+    if (lenis && !isMobile) {
       lenis.scrollTo(target as HTMLElement, { offset: -24 });
     } else {
       target.scrollIntoView({ behavior: "smooth" });
     }
   }
+
+  // On mobile, let native anchor behavior handle navigation
+  const handleLinkClick = (id: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isMobile) return; // Allow native anchor behavior
+    e.preventDefault();
+    scrollToSection(id);
+  };
 
   return (
     <header
@@ -69,10 +84,7 @@ export function Navbar() {
         >
           <a
             href="#hero"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection("#hero");
-            }}
+            onClick={(e) => handleLinkClick("#hero", e)}
             className="rounded-full text-sm font-semibold tracking-tight text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           >
             {site.name}
@@ -83,10 +95,7 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection(link.href);
-                }}
+                onClick={(e) => handleLinkClick(link.href, e)}
                 className="rounded-full px-4 py-2 text-sm text-muted transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 {link.label}
@@ -130,10 +139,7 @@ export function Navbar() {
                   <a
                     key={link.href}
                     href={link.href}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      scrollToSection(link.href);
-                    }}
+                    onClick={(e) => handleLinkClick(link.href, e)}
                     className="rounded-2xl px-4 py-3 text-base text-white/90 hover:bg-white/5"
                   >
                     {link.label}

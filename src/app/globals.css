@@ -39,16 +39,25 @@ body {
   color: #f5f7ff;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overscroll-behavior-y: none;
+  /* Removed overscroll-behavior-y: none to restore native rubber-band
+     bounce on mobile. This makes scrolling feel natural on iOS/Android.
+     The property was causing mobile users to perceive scrolling as
+     broken due to missing overscroll feedback. */
 }
 
-/* Global overflow prevention */
+/* Global overflow prevention — note: overflow-x: hidden on root elements
+   causes a known iOS Safari bug where vertical scrolling is blocked entirely.
+   We use overflow-x: clip instead (behaves identically visually, supported in
+   all modern browsers since 2021) and only apply overflow hiding to a wrapper
+   container in the layout. */
 html,
 body,
 #__next {
-  overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
+  /* overflow-x: clip prevents horizontal scroll without breaking vertical
+     scrolling on iOS — the key difference from overflow-x: hidden */
+  overflow-x: clip;
 }
 
 /* Prevent horizontal scroll on all elements */
@@ -113,6 +122,37 @@ svg {
 @media (pointer: coarse) {
   html {
     cursor: auto;
+  }
+}
+
+/* ─── Mobile scroll snap ───────────────────────────────────────────
+ * On touch devices, each section gently snaps into view as the user
+ * scrolls — a polished "deck of cards" feel without being intrusive.
+ * proximity (not mandatory) lets users freely browse tall sections
+ * like the Projects grid without getting trapped.
+ * ────────────────────────────────────────────────────────────────── */
+@media (pointer: coarse) {
+  html {
+    scroll-snap-type: y proximity;
+    /* 80px accounts for the fixed navbar at the top */
+    scroll-padding-top: 80px;
+  }
+
+  /* All top-level sections become snap targets */
+  section[id] {
+    scroll-snap-align: start;
+  }
+
+  /* Hero stays natural — no snap, sits at the very top */
+  #hero {
+    scroll-snap-align: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-snap-type: none;
+      scroll-padding-top: 0;
+    }
   }
 }
 

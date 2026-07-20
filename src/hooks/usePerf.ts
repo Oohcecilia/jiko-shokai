@@ -31,6 +31,49 @@ export function usePerformanceTier() {
   return tier === "low" ? "low" : "high";
 }
 
+/**
+ * Detects whether the user is on a mobile phone using responsive
+ * breakpoints and device capabilities — no user-agent sniffing.
+ *
+ * A device is considered a "mobile phone" when:
+ * 1. Viewport width is < 768px (Tailwind's `md` breakpoint)
+ * 2. The primary pointer is coarse (touch screen, not mouse/trackpad)
+ *
+ * This correctly excludes:
+ * - Desktop browsers with narrow windows (fine pointer)
+ * - Large tablets like iPad Pro (viewport >= 768px)
+ * - Devices with a mouse/trackpad connected (fine pointer)
+ *
+ * Also listens for device rotation (landscape/portrait changes that
+ * cross the 768px threshold) to stay reactive.
+ */
+export function useIsMobilePhone() {
+  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+
+    const check = () => {
+      const isNarrow = window.innerWidth < 768;
+      const isTouch =
+        typeof window !== "undefined" &&
+        window.matchMedia("(pointer: coarse)").matches;
+      setIsMobile(isNarrow && isTouch);
+    };
+
+    check();
+
+    // React to viewport changes (e.g., device rotation)
+    const mq = window.matchMedia("(max-width: 767px)");
+    mq.addEventListener("change", check);
+    return () => mq.removeEventListener("change", check);
+  }, []);
+
+  // Return false during SSR / first render to avoid hydration mismatch
+  return mounted ? isMobile : false;
+}
+
 export function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
   const [mounted, setMounted] = useState(false);

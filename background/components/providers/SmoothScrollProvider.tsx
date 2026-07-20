@@ -3,7 +3,7 @@
 import {
   createContext,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -23,37 +23,51 @@ export function useLenis() {
 
 export function SmoothScrollProvider({ children }: { children: ReactNode }) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
-  const rafId = useRef<number>();
+  const lenisRef = useRef<Lenis | null>(null);
 
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+  useLayoutEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Respect user preference: skip the custom smooth-scroll entirely and
-    // fall back to native browser scrolling.
-    if (prefersReducedMotion) return;
+    // On mobile/touch devices, skip Lenis entirely so native scrolling
+    // works without interference. Lenis's RAF loop and scroll interception
+    // can conflict with momentum scrolling on iOS/Android.
+    const isTouchDevice =
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches;
+
+    if (prefersReducedMotion || isTouchDevice) return;
 
     const instance = new Lenis({
       duration: 1.1,
       easing: (t: number) => 1 - Math.pow(1 - t, 3),
       smoothWheel: true,
+      syncTouch: false,
       wheelMultiplier: 1,
-      touchMultiplier: 1.2,
+      touchMultiplier: 1,
     });
+    lenisRef.current = instance;
 
+    // Add class to HTML to disable native smooth scrolling
+    document.documentElement.classList.add("lenis");
+
+    let frameId: number;
     function raf(time: number) {
       instance.raf(time);
-      rafId.current = requestAnimationFrame(raf);
+      frameId = requestAnimationFrame(raf);
     }
-    rafId.current = requestAnimationFrame(raf);
+    frameId = requestAnimationFrame(raf);
 
+    // Sync state for useLenis hook consumers
     setLenis(instance);
 
     return () => {
-      if (rafId.current) cancelAnimationFrame(rafId.current);
+      cancelAnimationFrame(frameId);
       instance.destroy();
+      lenisRef.current = null;
       setLenis(null);
+      document.documentElement.classList.remove("lenis");
     };
   }, []);
 

@@ -3,6 +3,7 @@
 import {
   useRef,
   useState,
+  useEffect,
   type MouseEvent,
   type ReactNode,
   type Ref,
@@ -37,9 +38,20 @@ export function MagneticButton({
   const ref = useRef<HTMLElement>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const prefersReducedMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Only enable magnetic effect on desktop with fine pointer and no reduced motion
+  const enableMagnetic = !isMobile && !prefersReducedMotion && typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches;
 
   function handleMouseMove(event: MouseEvent<HTMLElement>) {
-    if (prefersReducedMotion || !ref.current) return;
+    if (!enableMagnetic || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     const relX = event.clientX - (rect.left + rect.width / 2);
     const relY = event.clientY - (rect.top + rect.height / 2);
@@ -50,11 +62,11 @@ export function MagneticButton({
   }
 
   function handleMouseLeave() {
-    setOffset({ x: 0, y: 0 });
+    if (enableMagnetic) setOffset({ x: 0, y: 0 });
   }
 
   const base =
-    "relative inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-tight transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+    "relative inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-tight transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent touch-manipulation";
 
   const sizes = {
     md: "px-7 py-3.5 text-[15px]",
@@ -70,6 +82,37 @@ export function MagneticButton({
   };
 
   const classes = cn(base, sizes[size], variants[variant], className);
+
+  // On mobile: render plain element without Framer Motion wrapper to avoid touch interception
+  if (isMobile || prefersReducedMotion) {
+    if (href) {
+      return (
+        <a
+          ref={ref as Ref<HTMLAnchorElement>}
+          href={href}
+          target={external ? "_blank" : undefined}
+          rel={external ? "noopener noreferrer" : undefined}
+          aria-label={ariaLabel}
+          className={classes}
+        >
+          {children}
+        </a>
+      );
+    }
+    return (
+      <button
+        ref={ref as Ref<HTMLButtonElement>}
+        type="button"
+        onClick={onClick}
+        aria-label={ariaLabel}
+        className={classes}
+      >
+        {children}
+      </button>
+    );
+  }
+
+  // Desktop: full Framer Motion with magnetic effect
   const motionProps = {
     onMouseMove: handleMouseMove,
     onMouseLeave: handleMouseLeave,

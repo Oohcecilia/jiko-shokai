@@ -14,6 +14,7 @@ export const contactSchema = z.object({
     .string()
     .min(10, "Say a little more — at least 10 characters")
     .max(2000, "Keep it under 2000 characters"),
+  recaptchaToken: z.string().min(1, "Please complete the reCAPTCHA verification").optional(),
 });
 
 export type ContactSchema = z.infer<typeof contactSchema>;

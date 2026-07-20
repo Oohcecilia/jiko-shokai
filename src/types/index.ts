@@ -3,6 +3,7 @@ export interface Project {
   title: string;
   description: string;
   image: string;
+  blurDataURL?: string;
   video?: string;
   tags: string[];
   liveUrl?: string;
@@ -65,4 +66,5 @@ export interface ContactFormValues {
   email: string;
   subject: string;
   message: string;
+  recaptchaToken?: string;
 }

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 
+
 export function Preloader() {
   const [progress, setProgress] = useState(0);
   const isLoading = useAppStore((s) => s.isLoading);
@@ -46,7 +47,7 @@ export function Preloader() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              Jose Larry Cecilia
+              Ooh Cecilia
             </motion.span>
 
             <div className="relative h-px w-64 overflow-hidden bg-white/10 sm:w-80">

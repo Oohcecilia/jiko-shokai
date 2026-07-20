@@ -64,6 +64,13 @@ export function Skills() {
   const [active, setActive] = useState<SkillCategory>("Frontend");
   const filtered = useMemo(() => SKILLS.filter((s) => s.category === active), [active]);
   const [sphereContainerRef, sphereProgressRef] = useSectionProgress<HTMLDivElement>();
+  // Track whether the sphere container is in the viewport so TechSphere
+  // can pause its R3F render loop when offscreen (saves GPU).
+  // Use a generous margin to keep the loop running a bit before/after
+  // entering view, preventing flicker during fast scrolling.
+  const sphereInView = useInView(sphereContainerRef, {
+    margin: "200px 0px 200px 0px",
+  });
 
   return (
     <section id="skills" className="relative mx-auto max-w-6xl px-6 py-28 sm:py-36">
@@ -126,7 +133,7 @@ export function Skills() {
           transition={{ duration: 0.8 }}
           className="relative z-10 h-[300px] sm:h-[360px] lg:h-[440px] rounded-[2rem] border border-glass-border bg-white/[0.015]"
         >
-          <TechSphere progressRef={sphereProgressRef} />
+          <TechSphere progressRef={sphereProgressRef} inView={sphereInView} />
         </motion.div>
       </div>
     </section>

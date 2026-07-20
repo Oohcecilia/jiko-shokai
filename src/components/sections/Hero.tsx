@@ -51,6 +51,8 @@ export function Hero() {
   // Cinematic dissolve: as the hero scrolls out from under the next
   // section, the 3D scene dims and the copy fades/lifts away — driven
   // imperatively off one rAF loop so it never trips a React re-render.
+  // The loop must run continuously because exitProgress can reverse
+  // when the user scrolls back up, and we need to restore the styles.
   useEffect(() => {
     let frame: number;
     const tick = () => {

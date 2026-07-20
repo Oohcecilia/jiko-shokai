@@ -70,11 +70,17 @@ function Cube({ progressRef }: { progressRef?: MutableRefObject<number> }) {
   );
 }
 
-export function SkillCube({ progressRef }: { progressRef?: MutableRefObject<number> }) {
+export function SkillCube({ progressRef, inView = true }: { progressRef?: MutableRefObject<number>; inView?: boolean }) {
   const tier = usePerformanceTier();
+
+  // Pause the R3F render loop when the About section is scrolled
+  // out of view — saves GPU without affecting the visual experience.
+  const frameloop = inView ? "always" : "never";
+
   return (
     <div className="absolute inset-0">
       <Canvas
+        frameloop={frameloop}
         camera={{ position: [2.6, 1.6, 3.2], fov: 40 }}
         dpr={[1, tier === "low" ? 1.2 : 1.8]}
         style={{ width: "100%", height: "100%" }}

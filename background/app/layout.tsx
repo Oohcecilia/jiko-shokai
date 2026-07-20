@@ -7,13 +7,12 @@ import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvide
 import { Navbar } from "@/components/layout/Navbar";
 import { LoadingScreen } from "@/components/layout/LoadingScreen";
 import { ScrollProgressBar } from "@/components/layout/ScrollProgressBar";
-import { CursorGlow } from "@/components/layout/CursorGlow";
-import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+  preload: true,
 });
 
 // Update this to your real production domain before deploying.
@@ -72,6 +71,10 @@ export default function RootLayout({
 
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+      </head>
       <body>
         <script
           type="application/ld+json"
@@ -85,9 +88,7 @@ export default function RootLayout({
         </a>
 
         <LoadingScreen />
-        <NoiseOverlay />
         <ScrollProgressBar />
-        <CursorGlow />
 
         <SmoothScrollProvider>
           <Navbar />

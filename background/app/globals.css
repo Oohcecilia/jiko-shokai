@@ -9,6 +9,14 @@
 
   html {
     scroll-behavior: smooth;
+    /* Ensure html can scroll — height: 100% can interfere with
+       scrolling on mobile viewports, use min-height instead */
+    min-height: 100%;
+    -webkit-text-size-adjust: 100%;
+    /* overflow-x: hidden on root elements breaks vertical scrolling
+       on iOS (known WebKit bug). Use clip instead which behaves the
+       same visually without blocking scroll. */
+    overflow-x: clip;
   }
 
   /* Lenis takes over smooth scrolling with JS; avoid double-smoothing. */
@@ -19,6 +27,22 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    /* Ensure body can scroll and touch works */
+    min-height: 100%;
+    touch-action: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Film-grain noise overlay — purely decorative, no JS, no layout impact */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
 
   ::selection {
@@ -78,5 +102,68 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+  }
+
+  /* Scroll-triggered fade-in-up animation using CSS only */
+  .animate-fade-in-up {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(8px);
+    animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-timeline: view();
+    animation-range: entry 0% cover 40%;
+  }
+
+  @supports not (animation-timeline: view()) {
+    .animate-fade-in-up {
+      animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation-delay: 200ms;
+    }
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  /* Loading screen CSS animations (no JS delay, no Framer Motion) */
+  .animate-fade-out {
+    animation: fadeOut 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes fadeOut {
+    to {
+      opacity: 0;
+      filter: blur(12px);
+      pointer-events: none;
+    }
+  }
+
+  .animate-slide-up {
+    opacity: 0;
+    transform: translateY(100%);
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes slideUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-scale-x {
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: scaleX 0.8s ease-in-out forwards;
+  }
+
+  @keyframes scaleX {
+    to {
+      transform: scaleX(1);
+    }
   }
 }

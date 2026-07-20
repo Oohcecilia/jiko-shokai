@@ -29,12 +29,35 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
+    // On mobile/touch devices, skip Lenis entirely so native scrolling
+    // works untouched. Lenis's RAF loop and scroll interception can
+    // interfere with momentum scrolling and touch gestures on iOS/Android.
+    const isTouchDevice =
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches;
+
+    if (isTouchDevice || prefersReducedMotion) {
+      // Still set scroll progress from native scroll for GSAP triggers
+      const onScroll = () => {
+        const scrollY = window.scrollY;
+        const limit = document.documentElement.scrollHeight - window.innerHeight;
+        setScrollProgress(limit > 0 ? scrollY / limit : 0);
+        ScrollTrigger.update();
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+      return () => window.removeEventListener("scroll", onScroll);
+    }
+
+    // syncTouch defaults to false in Lenis — we explicitly confirm it
+    // here to ensure touch/pinch gestures on mobile are never intercepted.
     const lenis = new Lenis({
-      duration: prefersReducedMotion ? 0.4 : 1.15,
+      duration: 1.15,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: !prefersReducedMotion,
+      smoothWheel: true,
+      syncTouch: false,
       wheelMultiplier: 1,
-      touchMultiplier: 1.1,
+      touchMultiplier: 1,
     });
     setLenisInstance(lenis);
 

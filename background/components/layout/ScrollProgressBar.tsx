@@ -1,15 +1,27 @@
 "use client";
 
-import { motion, useScroll } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export function ScrollProgressBar() {
-  const { scrollYProgress } = useScroll();
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    function handleScroll() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(scrollTop / docHeight);
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <motion.div
+    <div
       aria-hidden="true"
-      style={{ scaleX: scrollYProgress }}
-      className="fixed left-0 right-0 top-0 z-[70] h-[3px] origin-left bg-gradient-to-r from-primary via-secondary to-accent"
+      style={{ transform: `scaleX(${progress})` }}
+      className="fixed left-0 right-0 top-0 z-[70] h-[3px] origin-left bg-gradient-to-r from-primary via-secondary to-accent will-change-transform"
     />
   );
 }

@@ -5,7 +5,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, MeshDistortMaterial, Environment } from "@react-three/drei";
 import * as THREE from "three";
 import { useMousePosition } from "@/hooks/useMousePosition";
-import { usePerformanceTier, usePrefersReducedMotion } from "@/hooks/usePerf";
+import { usePerformanceTier, usePrefersReducedMotion, useIsMobilePhone } from "@/hooks/usePerf";
 import { useAppStore } from "@/store/useAppStore";
 
 /**
@@ -19,6 +19,7 @@ export function GlobalBackground3D() {
   const mouse = useMousePosition();
   const tier = usePerformanceTier();
   const reducedMotion = usePrefersReducedMotion();
+  const isMobile = useIsMobilePhone();
   const heroExitProgress = useAppStore((s) => s.heroExitProgress);
   const [isCompact, setIsCompact] = useState(false);
 
@@ -30,6 +31,17 @@ export function GlobalBackground3D() {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
+  // ── Mobile phones: skip the full 3D scene entirely ──
+  // The R3F Canvas is expensive (GPU memory, shader compilation, RAF loop).
+  // On phones, render a lightweight static gradient fallback instead.
+  if (isMobile) {
+    return (
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-radial from-electric/[0.03] via-transparent to-transparent" />
+      </div>
+    );
+  }
+
   const particleCount = tier === "low" ? (isCompact ? 300 : 500) : (isCompact ? 500 : 1200);
 
   return (
@@ -38,7 +50,6 @@ export function GlobalBackground3D() {
         dpr={[1, isCompact ? 1.5 : 2]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         camera={{ position: [0, 0, 7.5], fov: 45 }}
-        style={{ touchAction: "none" }}
       >
         <fog attach="fog" args={["#050505", 6, 16]} />
 
