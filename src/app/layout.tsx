@@ -38,6 +38,29 @@ export const metadata: Metadata = {
     description:
       "Building digital experiences that feel alive — full stack development, 3D interfaces, and product design.",
     type: "website",
+    images: [
+      {
+        url: "/profile.png",
+        width: 512,
+        height: 512,
+        alt: SITE.name,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE.name} — ${SITE.role}`,
+    description:
+      "Building digital experiences that feel alive — full stack development, 3D interfaces, and product design.",
+    images: "/profile.png",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.png", sizes: "48x48", type: "image/png" },
+    ],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
   metadataBase: new URL("https://example.com"),
 };
