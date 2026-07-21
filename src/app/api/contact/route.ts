@@ -40,14 +40,23 @@ function getEmailJSConfig(): {
   serviceId: string;
   templateId: string;
   publicKey: string;
-  privateKey: string | undefined;
+  privateKey: string;
 } | null {
   const serviceId = process.env.EMAILJS_SERVICE_ID;
   const templateId = process.env.EMAILJS_TEMPLATE_ID;
   const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
   const privateKey = process.env.EMAILJS_PRIVATE_KEY;
 
-  if (!serviceId || !templateId || !publicKey) {
+  if (!serviceId || !templateId || !publicKey || !privateKey) {
+    console.warn(
+      "Contact form misconfiguration — missing required EmailJS env vars:",
+      {
+        serviceId: !!serviceId,
+        templateId: !!templateId,
+        publicKey: !!publicKey,
+        privateKey: !!privateKey,
+      },
+    );
     return null;
   }
 
@@ -97,7 +106,6 @@ export async function POST(request: Request) {
     const emailConfig = getEmailJSConfig();
 
     if (!emailConfig) {
-      console.warn("Contact form submission blocked: EmailJS is not configured.");
       return NextResponse.json(
         { error: "The contact form is not fully configured yet. Please try again later." },
         {
@@ -120,10 +128,12 @@ Subject: ${subject}
 ${message}`;
 
     // Send via EmailJS REST API (server-side)
+    // accessToken (private key) is required for server-side authorization
     const payload: Record<string, unknown> = {
       service_id: serviceId,
       template_id: templateId,
       user_id: publicKey,
+      accessToken: privateKey,
       template_params: {
         from_name: name,
         from_email: email,
@@ -133,11 +143,6 @@ ${message}`;
         "g-recaptcha-response": recaptchaToken,
       },
     };
-
-    // Include private key when available for server-side authorization
-    if (privateKey) {
-      payload.accessToken = privateKey;
-    }
 
     const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
       method: "POST",
@@ -150,7 +155,9 @@ ${message}`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error("EmailJS error:", response.status, errorText);
-      throw new Error("Failed to send message. Please try again.");
+      throw new Error(
+        `Email service responded with status ${response.status}: ${errorText || "Unknown error"}`,
+      );
     }
 
     return NextResponse.json(

@@ -104,3 +104,5 @@ webpack.stats.json
 
 # TypeScript cache
 *.tsbuildinfo
+
+package-lock.json
